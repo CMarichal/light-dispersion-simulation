@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TestModel.h"
 
-using Raytracing::Triangle;
+using Graphics::Triangle;
 
 void LoadTestModel(std::vector<Triangle>& triangles)
 {

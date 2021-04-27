@@ -11,7 +11,6 @@ private:
 	sf::Texture* texture;
 	sf::Sprite* sprite;
 	sf::Image* image;
-	sf::Event event;
 	int width;
 	int height;
 
@@ -32,6 +31,7 @@ public:
 
 	bool closedWindowEventHandler() override
 	{
+		sf::Event event;
 		bool isWindowClosed = window->pollEvent(event) && event.type == sf::Event::Closed;
 		if (isWindowClosed)
 		{

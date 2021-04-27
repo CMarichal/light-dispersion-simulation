@@ -141,6 +141,8 @@ namespace Graphics
                 const vec3 diffuseColor = scene.polygons[intersection.triangleIndex].color;
                 color = diffuseColor * (scene.ambiantLight + Graphics::Raytracing::DirectLight(intersection, scene.polygons, scene.lightSource));
             }
+
+            return color;
         }
     }
 }

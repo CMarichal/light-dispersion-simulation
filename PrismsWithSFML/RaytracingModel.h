@@ -82,7 +82,7 @@ namespace Graphics
 	class Scene
 	{
 	public:
-		vector<Triangle> polygons;
+		std::vector<Triangle> polygons;
 		Light lightSource;
 		glm::vec3 ambiantLight;
 
@@ -92,6 +92,8 @@ namespace Graphics
 		}
 	};
 
+
+	// Namespace containing raytracing models and functions
 	namespace Raytracing
 	{
 		// Describes an intersection point between a Ray and a Triangle
@@ -122,6 +124,7 @@ namespace Graphics
 
 
 	}
+
 }
 
 
