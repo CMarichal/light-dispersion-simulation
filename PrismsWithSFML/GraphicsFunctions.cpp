@@ -30,7 +30,7 @@ namespace Graphics
     namespace Raytracing
     {
 
-        glm_color_t lambertianIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
+        glm_color_t lambertianIllumination(const Intersection& intersection, const glm_color_t& ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
         {
             const Material* materialPtr = intersection.trianglePtr->material;
             const glm::vec3 n = intersection.trianglePtr->normal;
@@ -39,7 +39,8 @@ namespace Graphics
             return materialPtr->color * (materialPtr->ambiantCoeff * ambiantLight + materialPtr->diffuseCoeff * directLight * cosAngle);
         }
 
-        glm_color_t phongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
+
+        glm_color_t phongIllumination(const Intersection& intersection, const glm_color_t& ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
         {
             const Material* materialPtr = intersection.trianglePtr->material;
             const glm::vec3 viewDirection = intersection.rayPtr->direction;
@@ -52,7 +53,8 @@ namespace Graphics
             return lambertianPart + specularPart;
         }
 
-        glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
+
+        glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t& ambiantLight, const glm_color_t& directLight, const vec3& lightDirection)
         {
             const Material* materialPtr = intersection.trianglePtr->material;
             const glm::vec3 viewDirection = intersection.rayPtr->direction;
@@ -65,11 +67,13 @@ namespace Graphics
             return lambertianPart + specularPart;
         }
 
+
         float quadraticFalloff(const Intersection& i, const Light& light)
         {
             const glm::vec3 l = light.pos - i.position;
             return 1 / (4 * PI * glm::dot(l, l));
         }
+
         
         vector<Intersection> FindIntersections(const Ray& ray, const vector<Triangle>& triangles)
         {
@@ -90,6 +94,7 @@ namespace Graphics
             return intersectionsList;
         }
 
+
         Intersection ClosestIntersection(vector<Intersection>& intersectionsList)
         {
             return *std::min_element(intersectionsList.begin(), intersectionsList.end(),
@@ -97,6 +102,7 @@ namespace Graphics
                     return a.distance < b.distance;
                 });
         }
+
 
         bool TryIntersection(const Ray& ray, const Triangle& triangle, float& lambdaOut, vec3& pointOut)
         {
@@ -123,7 +129,7 @@ namespace Graphics
 
                     const double det{ 1 - B * D };
 
-                    if (det != 0) {
+                    if (fabs(det) > EPSILON) {
                         // computing the linear combination coefficients of the intersection point
                         const double lambda1{ (1 / det) * (A - B * C) };
                         const double lambda2{ (1 / det) * (-A * D + C) };
@@ -139,6 +145,7 @@ namespace Graphics
             }
             return false;
         }
+
 
         glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const Light& light) 
         {
@@ -166,6 +173,7 @@ namespace Graphics
             return light.color * quadraticFalloff(i, light);
         }
 
+
         glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y)
         {
             //default color
@@ -187,6 +195,7 @@ namespace Graphics
             return color;
         }
 
+
         glm_color_t raytraceRecursive(const Camera& camera, const Scene& scene, int x, int y, const int depthMax)
         {
             int depth = 0;
@@ -195,10 +204,11 @@ namespace Graphics
             vec3 dirRayFromPixel(x - camera.screen.width / 2, y - camera.screen.height / 2, camera.focal);
             Graphics::Raytracing::Ray rayFromPixel(camera.position, camera.rotationMatrix * dirRayFromPixel);
 
-            return raytrace_recursive_call(scene, rayFromPixel, depthMax, depth, color);
+            return raytrace_recursive_call(scene, rayFromPixel, depthMax, depth);
         }
 
-        glm_color_t raytrace_recursive_call(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth, glm_color_t& color)
+
+        glm_color_t raytrace_recursive_call(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth)
         {
             // compute the direct light color at the end
             if (depth >= depthMax)
@@ -210,9 +220,10 @@ namespace Graphics
                     auto closestIntersection = ClosestIntersection(intersectionList);
                     auto directLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
                     vec3 lightDirection = glm::normalize(scene.lightSource.pos - closestIntersection.position);
-                    color = lambertianIllumination(closestIntersection, scene.ambiantLight, directLightColor, lightDirection);
+                    auto color = lambertianIllumination(closestIntersection, scene.ambiantLight, directLightColor, lightDirection);
+                    return color;
                 }
-                return color;
+                return Graphics::COLOR_BLACK;
             }
 
             auto intersectionList = FindIntersections(incomingRay, scene.polygons);
@@ -223,10 +234,18 @@ namespace Graphics
                 auto normal = closestIntersection.trianglePtr->normal;
                 Ray originRay(closestIntersection.position, glm::reflect(incomingRay.direction, normal));
                 // the direct light for each surface is the incoming light from the following one
-                auto originLightColor = raytrace_recursive_call(scene, originRay, depthMax, depth + 1, color);
-                color = lambertianIllumination(closestIntersection, scene.ambiantLight, originLightColor, originRay.direction);
+                auto originLightColor = raytrace_recursive_call(scene, originRay, depthMax, depth + 1);
+                
+                // no surface has been found
+                if (originLightColor == COLOR_BLACK) 
+                {
+                    originLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
+                }
+                auto color = lambertianIllumination(closestIntersection, scene.ambiantLight, originLightColor, originRay.direction);
+                return color;
             }
-            return color;
+            // no object found
+            return Graphics::COLOR_BLACK;
         }
  
     }

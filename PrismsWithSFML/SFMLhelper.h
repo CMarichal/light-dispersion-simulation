@@ -60,7 +60,7 @@ public:
 		putPixel(x, y, convertColor(color));
 	}
 
-	void saveToFile(char*& filename) override
+	void saveToFile(std::string filename) override
 	{
 		image->saveToFile(filename);
 	}
@@ -81,6 +81,10 @@ public:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::S);		
 		case Key::D:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+		case Key::R:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::R);
+		case Key::F:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::F);
 		case Key::LEFT_ARROW:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
 		case Key::RIGHT_ARROW:
@@ -102,9 +106,9 @@ private:
 	}
 
 	sf::Color convertColor(const glm::vec3& color) {
-		uint8_t r = (color.r > 1) ? 255u : static_cast<sf::Uint8>(color.r * 255);
-		uint8_t g = (color.g > 1) ? 255u : static_cast<sf::Uint8>(color.g * 255);
-		uint8_t b = (color.b > 1) ? 255u : static_cast<sf::Uint8>(color.b * 255);
+		sf::Uint8 r = (color.r >= 1) ? 255u : static_cast<sf::Uint8>(color.r * 255);
+		sf::Uint8 g = (color.g >= 1) ? 255u : static_cast<sf::Uint8>(color.g * 255);
+		sf::Uint8 b = (color.b >= 1) ? 255u : static_cast<sf::Uint8>(color.b * 255);
 
 		return sf::Color{ r, g, b, 255u };
 	}

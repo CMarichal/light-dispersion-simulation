@@ -54,6 +54,7 @@ namespace Graphics
 		vec3 color;
 	};
 
+	// Describes a material and how it reflects light
 	class Material
 	{
 

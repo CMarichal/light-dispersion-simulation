@@ -13,12 +13,12 @@
 #include "SFMLhelper.h"
 #include "Utilities.h"
 
+
 // ----------------------------------------------------------------------------
 // USING STATEMENTS
 
 using glm::vec3;
 using glm::mat3;
-using utilities::Chrono;
 
 // ----------------------------------------------------------------------------
 // FUNCTIONS
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	constexpr vec3 INDIRECT_LIGHT = 0.5f * vec3(1, 1, 1);
 	Graphics::Light light{
 		glm::vec3(0.0f, -0.5f, -0.7f),
-		14.f * glm::vec3(1.0f, 1.0f, 1.0f)
+		20.f * glm::vec3(1.0f, 1.0f, 1.0f)
 	};
 
 	//3D models
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 
 	TestModel::LoadTestModel(scene.polygons);
 
-	auto chrono = Chrono();
+	auto chrono = utilities::Chrono();
 	chrono.startChrono();
 	while (!drawingManager.closedWindowEventHandler())
 	{
@@ -88,6 +88,14 @@ void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& man
 	if (manager.isKeyPressed(IInputManager::Key::DOWN_ARROW))
 	{
 		camera.position.y += step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::R))
+	{
+		camera.position.z += step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::F))
+	{
+		camera.position.z -= step;
 	}
 	if (manager.isKeyPressed(IInputManager::Key::LEFT_ARROW))
 	{

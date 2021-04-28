@@ -19,6 +19,6 @@ public:
 	virtual void drawPixel(int x, int y, const glm::vec3& color) =0;
 
 	// save the image
-	virtual void saveToFile(char*& filename) = 0;
+	virtual void saveToFile(std::string filename) = 0;
 };
 
