@@ -20,14 +20,20 @@ namespace Graphics
 		const float MAX_DISTANCE{ std::numeric_limits<float>::max() };
 		constexpr double EPSILON{ 0.00001 };
 
+		// compute a color according to Lambertian Illumination Model
+		glm_color_t lambertianIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
 
-		// Returns true if an intersection with a triangle is found along the ray
-		// Files out the given intersection
-		bool ClosestIntersection(
-			const Ray& ray,
-			const vector<Triangle>& triangles,
-			Intersection& closestIntersection
-		);
+		// compute a color according to Phong Illumination Model
+		glm_color_t phongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
+
+		// compute a color according to Blinn-Phong Illumination Model
+		glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
+
+		// Returns the list of the intersections along a ray
+		vector<Intersection> FindIntersections(const Ray& ray, const vector<Triangle>& triangles);
+
+		// Returns the closest intersection assuming that all intersection share the same ray
+		Intersection ClosestIntersection(vector<Intersection>& intersectionsList);
 
 		// Returns true if an intersection with a triangle is found along the ray
 		// Fills out the distance as lambdaOut and the intersection point as pointOut
@@ -39,6 +45,7 @@ namespace Graphics
 		// Return the color of the pixel according to raytracing
 		glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y);
 
+		// Return the color of the pixel according to recursive raytracing
 		glm_color_t raytrace_recursive(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth, glm_color_t& color);
 	}
 }

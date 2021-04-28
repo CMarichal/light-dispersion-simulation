@@ -105,14 +105,6 @@ namespace Graphics
 	// Namespace containing raytracing models and functions
 	namespace Raytracing
 	{
-		// Describes an intersection point between a Ray and a Triangle
-		struct Intersection
-		{
-			vec3 position;
-			float distance;
-			int triangleIndex;
-		};
-
 		// Describes a ray with a normalized direction
 		class Ray
 		{
@@ -130,6 +122,17 @@ namespace Graphics
 				return start + lambda * direction;
 			}
 		};
+
+		// Describes an intersection point between a Ray and a Triangle
+		struct Intersection
+		{
+			vec3 position;
+			float distance;
+			const Triangle* trianglePtr;
+			const Ray* rayPtr;
+		};
+
+
 
 
 	}
