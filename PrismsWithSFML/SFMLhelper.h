@@ -22,7 +22,7 @@ public:
 		window = new sf::RenderWindow(sf::VideoMode(width, height), "Display window");
 		
 		texture = new sf::Texture();
-		texture->create(static_cast<sf::Uint8>(width), static_cast<sf::Uint8>(height));
+		texture->create(width, height);
 		
 		image = new sf::Image();
 		image->create(width, height, sf::Color::Black);

@@ -8,54 +8,13 @@ namespace TestModel
 {
 	using glm::vec3;
 
-	Material materialFloor{
-	green,
-	green,
-	green,
-	0
-	};
-
-	Material materialLeftWall{
-	purple,
-	purple,
-	purple,
-	0
-	};
-
-	Material materialRightWall{
-	yellow,
-	yellow,
-	yellow,
-	0
-	};
-
-	Material materialCeiling{
-	cyan,
-	cyan,
-	cyan,
-	0
-	};
-
-	Material materialBackWall{
-	white,
-	white,
-	white,
-	0
-	};
-
-	Material materialShortBlock{
-	red,
-	red,
-	red,
-	0
-	};
-
-	Material materialTallBlock{
-	blue,
-	blue,
-	blue,
-	0
-	};
+	Material materialFloor(green);
+	Material materialLeftWall(purple);
+	Material materialRightWall(yellow);
+	Material materialCeiling(cyan);
+	Material materialBackWall(white);
+	Material materialShortBlock(red);
+	Material materialTallBlock(blue);
 
 	void LoadTestModel(std::vector<Triangle>& triangles)
 	{

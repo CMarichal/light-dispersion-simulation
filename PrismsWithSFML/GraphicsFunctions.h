@@ -18,16 +18,16 @@ namespace Graphics
 	{
 
 		const float MAX_DISTANCE{ std::numeric_limits<float>::max() };
-		constexpr double EPSILON{ 0.00001 };
+		constexpr double EPSILON{ 0.000001 };
 
 		// compute a color according to Lambertian Illumination Model
-		glm_color_t lambertianIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
+		glm_color_t lambertianIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection);
 
 		// compute a color according to Phong Illumination Model
-		glm_color_t phongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
+		glm_color_t phongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection);
 
 		// compute a color according to Blinn-Phong Illumination Model
-		glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const Light& lightSource);
+		glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t ambiantLight, const glm_color_t& directLight, const vec3& lightDirection);
 
 		// Returns the list of the intersections along a ray
 		vector<Intersection> FindIntersections(const Ray& ray, const vector<Triangle>& triangles);
@@ -46,6 +46,8 @@ namespace Graphics
 		glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y);
 
 		// Return the color of the pixel according to recursive raytracing
-		glm_color_t raytrace_recursive(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth, glm_color_t& color);
+		glm_color_t raytraceRecursive(const Camera& camera, const Scene& scene, int x, int y, const int depthMax);
+
+		glm_color_t raytrace_recursive_call(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth, glm_color_t& color);
 	}
 }

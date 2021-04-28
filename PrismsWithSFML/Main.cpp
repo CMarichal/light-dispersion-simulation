@@ -1,14 +1,14 @@
 #include "stdafx.h"
-#include "Main.h"
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
 #include "IDrawingManager.h"
+#include "IInputManager.h"
 #include <iostream>
-#include "GraphicsFunctions.h"
 #include "GraphicsModel.h"
+#include "GraphicsFunctions.h"
 #include "TestModel.h"
 #include "SFMLhelper.h"
 #include "Utilities.h"
@@ -133,7 +133,7 @@ void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawing
 	{
 		for (int x = 0; x < camera.screen.width; ++x)
 		{
-			auto color = Graphics::Raytracing::raytrace(camera, scene, x, y);
+			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 1);
 			drawingManager.drawPixel(x, y, color);
 		}
 	}

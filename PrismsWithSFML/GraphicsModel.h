@@ -54,12 +54,32 @@ namespace Graphics
 		vec3 color;
 	};
 
-	struct Material
+	class Material
 	{
-		const glm_color_t specularColor;
-		const glm_color_t diffuseColor;
-		const glm_color_t ambiantColor;
+
+	public:
+		const glm_color_t color;
+		const float specularCoeff;
+		const float diffuseCoeff;
+		const float ambiantCoeff;
 		const float shininess;
+
+		Material(vec3 color, float specularCoeff, float ambiantCoeff, float diffuseCoeff, float shininess):
+			color(color), 
+			specularCoeff(specularCoeff), 
+			diffuseCoeff(diffuseCoeff),
+			ambiantCoeff(ambiantCoeff),
+			shininess(shininess)
+		{}
+
+		Material(vec3 color):
+			color(color),
+			specularCoeff(1),
+			diffuseCoeff(1),
+			ambiantCoeff(1),
+			shininess(0)
+		{}
+		
 	};
 
 
