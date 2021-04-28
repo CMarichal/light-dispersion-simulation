@@ -145,17 +145,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="RaytracingFunctions.cpp" />
-    <ClCompile Include="RaytracingModel.cpp" />
+    <ClCompile Include="GraphicsFunctions.cpp" />
+    <ClCompile Include="GraphicsModel.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TestModel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IInputManager.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="IDrawingManager.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="RaytracingFunctions.h" />
-    <ClInclude Include="RaytracingModel.h" />
+    <ClInclude Include="GraphicsFunctions.h" />
+    <ClInclude Include="GraphicsModel.h" />
     <ClInclude Include="SFMLhelper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TestModel.h" />

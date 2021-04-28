@@ -2,9 +2,10 @@
 #include "stdafx.h"
 #include <SFML/Graphics.hpp>
 #include "IDrawingManager.h"
+#include "IInputManager.h"
 #include <memory>
 
-class SFML_Manager : public IDrawingManager
+class SFML_Manager : public IDrawingManager, public IInputManager
 {
 private:
 	sf::RenderWindow* window;
@@ -62,6 +63,36 @@ public:
 	void saveToFile(char*& filename) override
 	{
 		image->saveToFile(filename);
+	}
+
+	bool isKeyPressed(Key key)
+	{
+		switch (key)
+		{
+		case Key::Q:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+		case Key::W:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+		case Key::E:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+		case Key::A:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+		case Key::S:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::S);		
+		case Key::D:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+		case Key::LEFT_ARROW:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
+		case Key::RIGHT_ARROW:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
+		case Key::UP_ARROW:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
+		case Key::DOWN_ARROW:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
+		default:
+			return false;
+			break;
+		}
 	}
 
 private:
