@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 	};
 
 	//camera 
-	const float FOCAL{ static_cast<float>(SCREEN.height) };
+	const float FOCAL{ static_cast<float>(SCREEN.height)};
 	Graphics::Camera camera(
 		vec3(0, 0, (-2 * FOCAL / SCREEN.height) - 0.9f),
 		FOCAL,

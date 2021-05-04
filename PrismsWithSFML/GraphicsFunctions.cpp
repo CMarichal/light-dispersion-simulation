@@ -87,8 +87,10 @@ namespace Graphics
             {
                 if (TryIntersection(ray, triangle, distance, pointIntersection))
                 {
-                    auto intersection = Intersection{ pointIntersection, distance, &triangle, &ray };
-                    intersectionsList.push_back(intersection);
+                    if (distance > EPSILON) {
+                        auto intersection = Intersection{ pointIntersection, distance, &triangle, &ray };
+                        intersectionsList.push_back(intersection);
+                    }
                 }
             }
             return intersectionsList;
@@ -112,31 +114,31 @@ namespace Graphics
             const vec3 normalVec{ normalize(cross(e1, e2)) };
 
             // computing the denominator prevently
-            const double den{ dot(ray.direction, normalVec) };
+            const float den{ dot(ray.direction, normalVec) };
 
             if (fabs(den) >= EPSILON) {
-                const double lambda{ dot(triangle.v0 - ray.start, normalVec) / den };
-                const vec3 intersectionPoint{ ray.pointOnRay(static_cast<float>(lambda)) };
+                const float lambda{ dot(triangle.v0 - ray.start, normalVec) / den };
+                const vec3 intersectionPoint{ ray.pointOnRay(lambda) };
 
                 if (0 <= lambda && lambda <= MAX_DISTANCE) {
 
                     // Solving the linear system
-                    const double A{ dot(intersectionPoint - triangle.v0, normalize(e1) / glm::length(e1)) };
-                    const double B{ dot(normalize(e1), e2) / glm::length(e1) };
-                    const double C{
+                    const float A{ dot(intersectionPoint - triangle.v0, normalize(e1) / glm::length(e1)) };
+                    const float B{ dot(normalize(e1), e2) / glm::length(e1) };
+                    const float C{
                         dot(intersectionPoint - triangle.v0, normalize(e2) / glm::length(e2)) };
-                    const double D{ dot(normalize(e2), e1) / glm::length(e2) };
+                    const float D{ dot(normalize(e2), e1) / glm::length(e2) };
 
-                    const double det{ 1 - B * D };
+                    const float det{ 1 - B * D };
 
                     if (fabs(det) > EPSILON) {
                         // computing the linear combination coefficients of the intersection point
-                        const double lambda1{ (1 / det) * (A - B * C) };
-                        const double lambda2{ (1 / det) * (-A * D + C) };
+                        const float lambda1{ (1 / det) * (A - B * C) };
+                        const float lambda2{ (1 / det) * (-A * D + C) };
 
                         if (0 <= lambda1 && lambda1 <= 1 && 0 <= lambda2 && lambda2 <= 1 &&
                             lambda1 + lambda2 <= 1) {
-                            lambdaOut = static_cast<float>(lambda);
+                            lambdaOut = lambda;
                             pointOut = intersectionPoint;
                             return true;
                         }
@@ -173,6 +175,12 @@ namespace Graphics
             return light.color * quadraticFalloff(i, light);
         }
 
+        glm_color_t computeColorLight(const Intersection& intersection, const Scene& scene, const Light& lightSource)
+        {
+            auto directLightColor = DirectLight(intersection, scene.polygons, lightSource);
+            auto lightDirection = glm::normalize(lightSource.pos - intersection.position);
+            return lambertianIllumination(intersection, scene.ambiantLight, directLightColor, lightDirection);
+        }
 
         glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y)
         {
@@ -186,11 +194,9 @@ namespace Graphics
             auto intersectionList = FindIntersections(rayFromPixel, scene.polygons);
             if (intersectionList.size() > 0)
             {
-                //equation for illumination
                 auto closestIntersection = ClosestIntersection(intersectionList);
-                auto directLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
-                auto lightDirection = glm::normalize(scene.lightSource.pos - closestIntersection.position);
-                color = lambertianIllumination(closestIntersection, scene.ambiantLight, directLightColor, lightDirection);
+                //equation for illumination
+                color = computeColorLight(closestIntersection, scene, scene.lightSource);
             }
             return color;
         }
@@ -218,9 +224,7 @@ namespace Graphics
                 {
                     //equation for illumination
                     auto closestIntersection = ClosestIntersection(intersectionList);
-                    auto directLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
-                    vec3 lightDirection = glm::normalize(scene.lightSource.pos - closestIntersection.position);
-                    auto color = lambertianIllumination(closestIntersection, scene.ambiantLight, directLightColor, lightDirection);
+                    auto color = computeColorLight(closestIntersection, scene, scene.lightSource);
                     return color;
                 }
                 return Graphics::COLOR_BLACK;
@@ -232,7 +236,7 @@ namespace Graphics
                 auto closestIntersection = ClosestIntersection(intersectionList);
 
                 auto normal = closestIntersection.trianglePtr->normal;
-                Ray originRay(closestIntersection.position, glm::reflect(incomingRay.direction, normal));
+                const Ray originRay(closestIntersection.position, glm::reflect(incomingRay.direction, normal));
                 // the direct light for each surface is the incoming light from the following one
                 auto originLightColor = raytrace_recursive_call(scene, originRay, depthMax, depth + 1);
                 

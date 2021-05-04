@@ -75,10 +75,10 @@ namespace Graphics
 
 		Material(vec3 color):
 			color(color),
-			specularCoeff(1),
-			diffuseCoeff(1),
-			ambiantCoeff(1),
-			shininess(0)
+			specularCoeff(1.f),
+			diffuseCoeff(1.f),
+			ambiantCoeff(1.f),
+			shininess(1)
 		{}
 		
 	};
@@ -133,9 +133,9 @@ namespace Graphics
 			vec3 start;
 			vec3 direction;
 
-			Ray(vec3 start, vec3 direction) : start(start)
+			Ray(vec3 start, vec3 dir) : start(start)
 			{
-				this->direction = glm::normalize(direction);
+				direction = glm::normalize(dir);
 			}
 
 			vec3 pointOnRay(float lambda) const
