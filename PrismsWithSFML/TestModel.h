@@ -18,6 +18,8 @@ namespace TestModel
 	constexpr vec3 purple(0.75f, 0.15f, 0.75f);
 	constexpr vec3 white(0.75f, 0.75f, 0.75f);
 
+	constexpr vec3 grey(0.5f, 0.5f, 0.5f);
+
 	// Loads the Cornell Box. It is scaled to fill the volume:
 	// -1 <= x <= +1
 	// -1 <= y <= +1

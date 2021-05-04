@@ -219,33 +219,44 @@ namespace Graphics
             // compute the direct light color at the end
             if (depth >= depthMax)
             {
-                auto intersectionList = FindIntersections(incomingRay, scene.polygons);
-                if (intersectionList.size() > 0)
-                {
-                    //equation for illumination
-                    auto closestIntersection = ClosestIntersection(intersectionList);
-                    auto color = computeColorLight(closestIntersection, scene, scene.lightSource);
-                    return color;
-                }
                 return Graphics::COLOR_BLACK;
             }
 
+            //looking for intersection
             auto intersectionList = FindIntersections(incomingRay, scene.polygons);
             if (intersectionList.size() > 0)
             {
                 auto closestIntersection = ClosestIntersection(intersectionList);
-
                 auto normal = closestIntersection.trianglePtr->normal;
-                const Ray originRay(closestIntersection.position, glm::reflect(incomingRay.direction, normal));
-                // the direct light for each surface is the incoming light from the following one
-                auto originLightColor = raytrace_recursive_call(scene, originRay, depthMax, depth + 1);
-                
-                // no surface has been found
-                if (originLightColor == COLOR_BLACK) 
+
+
+                // REFLECTION
+                const Ray reflectedRay(closestIntersection.position, glm::reflect(incomingRay.direction, normal));
+                auto reflectedLightColor = raytrace_recursive_call(scene, reflectedRay, depthMax, depth + 1);
+
+                // REFRACTION
+                float refractiveRatio{};
+                //exterior normals assumption
+                if (glm::dot(incomingRay.direction, normal) <= 0)
                 {
-                    originLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
+                    refractiveRatio = 1 / closestIntersection.trianglePtr->material->refractiveIndex;
                 }
-                auto color = lambertianIllumination(closestIntersection, scene.ambiantLight, originLightColor, originRay.direction);
+                else
+                {
+                    refractiveRatio = closestIntersection.trianglePtr->material->refractiveIndex;
+                }
+                const Ray refractedRay(closestIntersection.position, glm::refract(incomingRay.direction, normal, refractiveRatio));
+                auto refractedLightColor = raytrace_recursive_call(scene, refractedRay, depthMax, depth + 1);
+                
+                // DIRECT ILLUMINATION
+                auto originLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
+                vec3 lightDir = glm::normalize(scene.lightSource.pos - closestIntersection.position);
+                auto lambertianColor = lambertianIllumination(closestIntersection, scene.ambiantLight, originLightColor, lightDir);
+
+                // ADDING TOGETHER
+                auto color = lambertianColor
+                    + closestIntersection.trianglePtr->material->reflectionCoeff * reflectedLightColor
+                    + closestIntersection.trianglePtr->material->refractionCoeff * refractedLightColor;
                 return color;
             }
             // no object found

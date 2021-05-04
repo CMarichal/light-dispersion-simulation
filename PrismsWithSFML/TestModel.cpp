@@ -14,7 +14,15 @@ namespace TestModel
 	Material materialCeiling(cyan);
 	Material materialBackWall(white);
 	Material materialShortBlock(red);
-	Material materialTallBlock(blue);
+	Material materialTallBlock(
+		grey, 
+		1, //specular
+		1, //diffuse
+		1, //ambiant
+		0, //shininess
+		0, //reflection
+		1, //refraction
+		1); 
 
 	void LoadTestModel(std::vector<Triangle>& triangles)
 	{

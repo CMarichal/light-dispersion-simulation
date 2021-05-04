@@ -64,13 +64,24 @@ namespace Graphics
 		const float diffuseCoeff;
 		const float ambiantCoeff;
 		const float shininess;
+		const float reflectionCoeff;
+		const float refractionCoeff;
+		const float refractiveIndex;
 
-		Material(vec3 color, float specularCoeff, float ambiantCoeff, float diffuseCoeff, float shininess):
-			color(color), 
-			specularCoeff(specularCoeff), 
+		Material(vec3 color, float specularCoeff, float ambiantCoeff, float diffuseCoeff,
+			float shininess,
+			float reflectionCoeff,
+			float refractionCoeff,
+			float refractiveIndex) :
+			color(color),
+			specularCoeff(specularCoeff),
 			diffuseCoeff(diffuseCoeff),
 			ambiantCoeff(ambiantCoeff),
-			shininess(shininess)
+			shininess(shininess),
+			reflectionCoeff(reflectionCoeff),
+			refractionCoeff(refractionCoeff),
+			refractiveIndex(refractiveIndex)
+
 		{}
 
 		Material(vec3 color):
@@ -78,7 +89,10 @@ namespace Graphics
 			specularCoeff(1.f),
 			diffuseCoeff(1.f),
 			ambiantCoeff(1.f),
-			shininess(1)
+			shininess(1),
+			reflectionCoeff(0.0f),
+			refractionCoeff(0.f),
+			refractiveIndex(2.417f) //Diamond
 		{}
 		
 	};

@@ -141,7 +141,7 @@ void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawing
 	{
 		for (int x = 0; x < camera.screen.width; ++x)
 		{
-			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 1);
+			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 5);
 			drawingManager.drawPixel(x, y, color);
 		}
 	}
