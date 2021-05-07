@@ -14,17 +14,19 @@ namespace TestModel
 	Material materialCeiling(cyan);
 	Material materialBackWall(white);
 	Material materialShortBlock(red);
-	Material materialTallBlock(
+	Material materialTallBlock(blue);
+
+	Material materialPrism(
 		grey, 
 		1, //specular
-		1, //diffuse
-		1, //ambiant
-		0, //shininess
-		0, //reflection
+		0, //diffuse
+		0, //ambiant
+		2, //shininess
+		0.5, //reflection
 		1, //refraction
-		1); 
+		1);
 
-	void LoadTestModel(std::vector<Triangle>& triangles)
+	void LoadTestModelCornellBox(std::vector<Triangle>& triangles)
 	{
 		triangles.clear();
 		triangles.reserve(5 * 2 * 3);
@@ -111,24 +113,104 @@ namespace TestModel
 		H = vec3(314, 330, 456);
 
 		// Front
-		triangles.push_back(Triangle(E, B, A, &materialTallBlock));
-		triangles.push_back(Triangle(E, F, B, &materialTallBlock));
+		triangles.push_back(Triangle(E, B, A, &materialPrism));
+		triangles.push_back(Triangle(E, F, B, &materialPrism));
 
 		// Front
-		triangles.push_back(Triangle(F, D, B, &materialTallBlock));
-		triangles.push_back(Triangle(F, H, D, &materialTallBlock));
+		triangles.push_back(Triangle(F, D, B, &materialPrism));
+		triangles.push_back(Triangle(F, H, D, &materialPrism));
 
 		// BACK
-		triangles.push_back(Triangle(H, C, D, &materialTallBlock));
-		triangles.push_back(Triangle(H, G, C, &materialTallBlock));
+		triangles.push_back(Triangle(H, C, D, &materialPrism));
+		triangles.push_back(Triangle(H, G, C, &materialPrism));
 
 		// LEFT
-		triangles.push_back(Triangle(G, E, C, &materialTallBlock));
-		triangles.push_back(Triangle(E, A, C, &materialTallBlock));
+		triangles.push_back(Triangle(G, E, C, &materialPrism));
+		triangles.push_back(Triangle(E, A, C, &materialPrism));
 
 		// TOP
-		triangles.push_back(Triangle(G, F, E, &materialTallBlock));
-		triangles.push_back(Triangle(G, H, F, &materialTallBlock));
+		triangles.push_back(Triangle(G, F, E, &materialPrism));
+		triangles.push_back(Triangle(G, H, F, &materialPrism));
+
+
+		// ----------------------------------------------
+		// Scale to the volume [-1,1]^3
+
+		for (size_t i = 0; i < triangles.size(); ++i)
+		{
+			triangles[i].v0 *= 2 / L;
+			triangles[i].v1 *= 2 / L;
+			triangles[i].v2 *= 2 / L;
+
+			triangles[i].v0 -= vec3(1, 1, 1);
+			triangles[i].v1 -= vec3(1, 1, 1);
+			triangles[i].v2 -= vec3(1, 1, 1);
+
+			triangles[i].v0.x *= -1;
+			triangles[i].v1.x *= -1;
+			triangles[i].v2.x *= -1;
+
+			triangles[i].v0.y *= -1;
+			triangles[i].v1.y *= -1;
+			triangles[i].v2.y *= -1;
+
+			triangles[i].ComputeNormal();
+		}
+	}
+
+	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles)
+	{
+		triangles.clear();
+		triangles.reserve(2 + 2 + 3 * 2);
+
+		// ---------------------------------------------------------------------------
+		// Room
+
+		float L = 20;			// Length of the scene side.
+
+		//floor
+		vec3 A(0, 0, 0);
+		vec3 B(0, 0, L);
+		vec3 C(L, 0, L);
+		vec3 D(L, 0, 0);
+
+		// Floor:
+		triangles.push_back(Triangle(C, B, A, &materialFloor));
+		triangles.push_back(Triangle(C, A, D, &materialFloor));
+
+		// ---------------------------------------------------------------------------
+		// Prism
+
+		float half_L = L/2;
+		//prism base
+		vec3 E(half_L - 2, 0, half_L + 2);
+		vec3 F(half_L + 2, 0, half_L + 2);
+		vec3 G(half_L, 0, half_L - 2);
+
+		float height = 8;
+		//prism top
+		vec3 H = E + vec3(0, height, 0);
+		vec3 I = F + vec3(0, height, 0);
+		vec3 J = G + vec3(0, height, 0);
+		
+
+		// Base
+		triangles.push_back(Triangle(E, G, F, &materialPrism));
+
+		// Top
+		triangles.push_back(Triangle(H, J, I, &materialPrism));
+
+		// BACK
+		triangles.push_back(Triangle(E, H, F, &materialPrism));
+		triangles.push_back(Triangle(H, I, F, &materialPrism));
+
+		// LEFT
+		triangles.push_back(Triangle(F, I, G, &materialPrism));
+		triangles.push_back(Triangle(I, J, G, &materialPrism));
+
+		// RIGHT
+		triangles.push_back(Triangle(J, E, G, &materialPrism));
+		triangles.push_back(Triangle(E, J, H, &materialPrism));
 
 
 		// ----------------------------------------------

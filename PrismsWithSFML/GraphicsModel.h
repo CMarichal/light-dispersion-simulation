@@ -47,10 +47,18 @@ namespace Graphics
 
 	};
 
-	// Describes an omni-light source
-	struct Light
+	// Describes an omni-directional light source
+	struct LightPoint
 	{
 		vec3 pos;
+		vec3 color;
+	};
+
+	// Describes an directional source
+	struct LightDirectional
+	{
+		vec3 pos;
+		vec3 direction;
 		vec3 color;
 	};
 
@@ -90,7 +98,7 @@ namespace Graphics
 			diffuseCoeff(1.f),
 			ambiantCoeff(1.f),
 			shininess(1),
-			reflectionCoeff(0.0f),
+			reflectionCoeff(0.02f),
 			refractionCoeff(0.f),
 			refractiveIndex(2.417f) //Diamond
 		{}
@@ -108,10 +116,11 @@ namespace Graphics
 		vec3 normal;
 		Material* material;
 
+
 		Triangle(vec3 v0, vec3 v1, vec3 v2, Material* material)
 			: v0(v0), v1(v1), v2(v2), material(material)
 		{
-			ComputeNormal();
+			this->ComputeNormal();
 		}
 
 		void ComputeNormal()
@@ -120,6 +129,7 @@ namespace Graphics
 			vec3 e2 = v2 - v0;
 			normal = glm::normalize(glm::cross(e2, e1));
 		}
+
 	};
 
 	// Represents a scene with only one light source
@@ -127,10 +137,10 @@ namespace Graphics
 	{
 	public:
 		std::vector<Triangle> polygons;
-		Light lightSource;
+		LightPoint lightSource;
 		glm_color_t ambiantLight;
 
-		Scene(Light lightSource, glm::vec3 ambiantLight) :
+		Scene(LightPoint lightSource, glm::vec3 ambiantLight) :
 			lightSource(lightSource), ambiantLight(ambiantLight)
 		{
 		}
@@ -167,7 +177,80 @@ namespace Graphics
 			const Ray* rayPtr;
 		};
 
+	}
 
+	namespace Dispersion
+	{
+
+		// Describes a color using a simplified wave model
+		class ColorWave
+		{
+		public:
+			float wavelenght; //in nanometer
+
+			ColorWave(float wavelenght):
+				wavelenght{wavelenght}
+			{ }
+
+			// compute an approximation of the RGB color from the wavelength using
+			// the method from Mihai and Strajescu, FROM WAVELENGTH TO RGB FILTER, 2007
+			glm_color_t toRGBcolor()
+			{
+				if (380 <= wavelenght && wavelenght < 410)
+				{
+					float R = 0.6f - 0.41f * (410 - wavelenght) / 30;
+					float G = 0;
+					float B = 0.39f + 0.6f * (410 - wavelenght) / 30;
+					return glm_color_t(R, G, B);
+				}
+				else if (410 <= wavelenght && wavelenght < 440)
+				{
+					float R = 0;
+					float G = 1-(490-wavelenght) / 50;
+					float B = 1;
+					return glm_color_t(R, G, B);
+				}
+				else if (490 <= wavelenght && wavelenght < 510)
+				{
+					float R = 0;
+					float G = 1;
+					float B = (510-wavelenght)/20;
+					return glm_color_t(R, G, B);
+				}
+				else if (510 <= wavelenght && wavelenght < 580)
+				{
+					float R = 1-(580-wavelenght)/70;
+					float G = 1;
+					float B = 0;
+					return glm_color_t(R, G, B);
+				}
+				else if (580 <= wavelenght && wavelenght < 640)
+				{
+					float R = 1;
+					float G = (640 - wavelenght)/60;
+					float B = 0;
+					return glm_color_t(R, G, B);
+				}
+				else if (640 <= wavelenght && wavelenght < 700)
+				{
+					float R = 1;
+					float G = 0;
+					float B = 0;
+					return glm_color_t(R, G, B);
+				}
+				else if (700 <= wavelenght && wavelenght < 780)
+				{
+					float R = 0.35f-0.65f*(780-wavelenght)/80;
+					float G = 0;
+					float B = 0;
+					return glm_color_t(R, G, B);
+				}
+				else
+				{
+					return COLOR_BLACK;
+				}
+			}
+		};
 
 
 	}

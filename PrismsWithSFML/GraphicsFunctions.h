@@ -29,6 +29,9 @@ namespace Graphics
 		// compute a color according to Blinn-Phong Illumination Model
 		glm_color_t blinnPhongIllumination(const Intersection& intersection, const glm_color_t& ambiantLight, const glm_color_t& directLight, const vec3& lightDirection);
 
+		// compute the refracted light at an intersection
+		glm_color_t refractedLight(const Scene& scene, const Intersection& intersection, const Ray& incidentRay, const int depthMax, const int depth);
+
 		// Returns the list of the intersections along a ray
 		vector<Intersection> FindIntersections(const Ray& ray, const vector<Triangle>& triangles);
 
@@ -40,7 +43,7 @@ namespace Graphics
 		bool TryIntersection(const Ray& ray, const Triangle& triangle, float& lambdaOut, glm::vec3& pointOut);
 
 		// Compute the color of a point directly illuminated by a light source Light
-		glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const Light& light);
+		glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const LightPoint& light);
 
 		// Return the color of the pixel according to raytracing
 		glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y);

@@ -25,12 +25,14 @@ using glm::mat3;
 
 void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawingManager& manager);
 void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
 
 int main(int argc, char* argv[])
 {
 	const Graphics::Screen SCREEN{
 	50 * 2 * 2, //width
-	50 * 2 * 2  // height
+	50 * 2 * 2 // height
 	};
 
 	//camera 
@@ -42,8 +44,8 @@ int main(int argc, char* argv[])
 
 	//lighting
 	constexpr vec3 INDIRECT_LIGHT = 0.5f * vec3(1, 1, 1);
-	Graphics::Light light{
-		glm::vec3(0.0f, -0.5f, -0.7f),
+	Graphics::LightPoint light{
+		glm::vec3(-1.f, 0.8f, 0.5f),
 		20.f * glm::vec3(1.0f, 1.0f, 1.0f)
 	};
 
@@ -53,7 +55,7 @@ int main(int argc, char* argv[])
 	//SFML SCREEN
 	auto drawingManager = SFML_Manager(camera.screen.width, camera.screen.height);
 
-	TestModel::LoadTestModel(scene.polygons);
+	TestModel::LoadTestModelTriangularPrism(scene.polygons);
 
 	auto chrono = utilities::Chrono();
 	chrono.startChrono();
@@ -68,7 +70,7 @@ int main(int argc, char* argv[])
 		
 		std::cout << "Render time: " << chrono.getChronoElapsedTime() << " ms." << std::endl;
 	}
-
+	drawingManager.saveToFile("Screenshot.png");
 	return EXIT_SUCCESS;
 }
 
@@ -81,32 +83,78 @@ void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& man
 	float yaw{ 10.0f };
 
 	//moving camera
-	if (manager.isKeyPressed(IInputManager::Key::UP_ARROW))
+	ControlCamera(scene, camera, manager);
+
+	//moving light
+	ControlLight(scene, camera, manager);
+}
+
+
+
+void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawingManager& drawingManager)
+{
+	for (int y = 0; y < camera.screen.height; ++y)
 	{
-		camera.position.y -= step;
+		for (int x = 0; x < camera.screen.width; ++x)
+		{
+			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 5);
+			drawingManager.drawPixel(x, y, color);
+		}
 	}
-	if (manager.isKeyPressed(IInputManager::Key::DOWN_ARROW))
-	{
-		camera.position.y += step;
-	}
-	if (manager.isKeyPressed(IInputManager::Key::R))
-	{
-		camera.position.z += step;
-	}
-	if (manager.isKeyPressed(IInputManager::Key::F))
-	{
-		camera.position.z -= step;
-	}
+}
+
+
+void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager)
+{
+
+	//step for translations
+	float step{ 0.1f };
+
+	//in degrees
+	float yaw{ 10.0f };
+
 	if (manager.isKeyPressed(IInputManager::Key::LEFT_ARROW))
 	{
-		camera.rotationMatrix = Graphics::rotationYMatrix(yaw) * camera.rotationMatrix;
+		camera.position.x -= step;
 	}
 	if (manager.isKeyPressed(IInputManager::Key::RIGHT_ARROW))
 	{
+		camera.position.x += step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::UP_ARROW))
+	{
+		camera.position.z += step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::DOWN_ARROW))
+	{
+		camera.position.z -= step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::R))
+	{
+		camera.position.y -= step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::F))
+	{
+		camera.position.y += step;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::T))
+	{
+		camera.rotationMatrix = Graphics::rotationYMatrix(yaw) * camera.rotationMatrix;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::Y))
+	{
 		camera.rotationMatrix = Graphics::rotationYMatrix(-yaw) * camera.rotationMatrix;
 	}
+}
 
-	//moving light
+void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager)
+{
+	//step for translations
+	float step{ 0.1f };
+
+	//in degrees
+	float yaw{ 10.0f };
+
 	if (manager.isKeyPressed(IInputManager::Key::W))
 	{
 		scene.lightSource.pos += step * camera.forward();
@@ -132,18 +180,3 @@ void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& man
 		scene.lightSource.pos += step * camera.down();
 	}
 }
-
-
-
-void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawingManager& drawingManager)
-{
-	for (int y = 0; y < camera.screen.height; ++y)
-	{
-		for (int x = 0; x < camera.screen.width; ++x)
-		{
-			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 5);
-			drawingManager.drawPixel(x, y, color);
-		}
-	}
-}
-

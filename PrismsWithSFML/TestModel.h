@@ -24,6 +24,12 @@ namespace TestModel
 	// -1 <= x <= +1
 	// -1 <= y <= +1
 	// -1 <= z <= +1
-	void LoadTestModel(std::vector<Graphics::Triangle>& triangles);
+	void LoadTestModelCornellBox(std::vector<Graphics::Triangle>& triangles);
+
+	// Loads a model with a prism on a plane surface. It is scaled to fill the volume:
+	// -1 <= x <= +1
+	// -1 <= y <= +1
+	// -1 <= z <= +1
+	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles);
 }
 

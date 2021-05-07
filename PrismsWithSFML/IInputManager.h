@@ -17,7 +17,9 @@ public:
 		S,
 		D,
 		R,
-		F
+		F,
+		T,
+		Y
 	};
 
 	virtual bool isKeyPressed(Key key) = 0;

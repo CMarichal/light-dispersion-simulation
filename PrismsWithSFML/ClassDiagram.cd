@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Graphics::Camera">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAggAAAACAAAAAAAAIAUAAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Graphics::Material">
+    <Position X="4" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEABABAAAAAAgAAAAAEAAAAAAAAAAACAAAAIACAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Graphics::Triangle">
+    <Position X="2.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAABAAAAAIgAABQAAAAAAAIAAABAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Graphics::Scene">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAgAgAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Graphics::Raytracing::Ray">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAKAAgAAAAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Graphics::Screen">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Graphics::Light">
+    <Position X="5.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Graphics::Raytracing::Intersection">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAIAAAAEAAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="Graphics::glm_color_t" Collapsed="true">
+    <Position X="5.75" Y="5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GraphicsModel.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -85,6 +85,10 @@ public:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::R);
 		case Key::F:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::F);
+		case Key::T:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::T);
+		case Key::Y:
+			return sf::Keyboard::isKeyPressed(sf::Keyboard::Y);
 		case Key::LEFT_ARROW:
 			return sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
 		case Key::RIGHT_ARROW:
