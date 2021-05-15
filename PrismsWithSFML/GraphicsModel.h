@@ -5,8 +5,12 @@ using glm::vec3;
 
 namespace Graphics
 {
+
 	typedef glm::vec3 glm_color_t;
 	constexpr glm_color_t COLOR_BLACK(0, 0, 0);
+	constexpr glm_color_t COLOR_WHITE(1, 1, 1);
+	
+	const float PI{ static_cast<float>(atan(1) * 4) };
 
 	// Represent a screen of pixels
 	struct Screen
@@ -47,19 +51,84 @@ namespace Graphics
 
 	};
 
-	// Describes an omni-directional light source
-	struct LightPoint
+	// Describes a light source
+	class Light
 	{
+	public:
 		vec3 pos;
-		vec3 color;
+		glm_color_t color;
+
+	protected:
+		Light(vec3 position, glm_color_t color):
+			pos(position),
+			color(color)
+		{ }
+
+	public:
+
+		virtual vec3 getIncidentRayDirection(vec3 hitPoint) const = 0;
+
+		virtual float getDistance(vec3 hitPoint) const = 0;
+
+		virtual float falloff(vec3 hitPoint) const = 0;
+
+	};
+
+	// Describes an omni-directional light source
+	class LightPoint : public virtual Light
+	{
+	public:
+		LightPoint(vec3 pos, glm_color_t color) :
+			Light(pos, color)
+		{};
+
+		vec3 getIncidentRayDirection(vec3 hitPoint) const override
+		{
+			return glm::normalize(hitPoint - pos);
+		}
+
+		float getDistance(vec3 hitPoint) const override
+		{
+			return glm::length(hitPoint - pos);
+		}
+
+		float falloff(vec3 hitPoint) const override
+		{
+			float d = getDistance(hitPoint);
+			return 1 / (4 * PI * d*d);
+		}
+
 	};
 
 	// Describes an directional source
-	struct LightDirectional
+	class LightDirectional : public virtual Light
 	{
-		vec3 pos;
+	public:
 		vec3 direction;
-		vec3 color;
+	
+		LightDirectional(vec3 pos, glm_color_t color, vec3 dir) :
+			Light(pos, color)
+		{
+			direction = glm::normalize(dir);
+		};
+
+		vec3 getIncidentRayDirection(vec3 hitPoint) const override
+		{
+			return direction;
+		}
+
+		float getDistance(vec3 hitPoint) const override
+		{
+			auto hypothenus = hitPoint - pos;
+			return fabs(glm::dot(hypothenus, direction));
+		}
+
+		float falloff(vec3 hitPoint) const override
+		{
+			float d = getDistance(hitPoint);
+			return 1/ (d);
+		}
+
 	};
 
 	// Describes a material and how it reflects light
@@ -75,12 +144,15 @@ namespace Graphics
 		const float reflectionCoeff;
 		const float refractionCoeff;
 		const float refractiveIndex;
+		float cauchyCoeff_A; // no unit
+		float cauchyCoeff_B; //nanometer squared
 
 		Material(vec3 color, float specularCoeff, float ambiantCoeff, float diffuseCoeff,
 			float shininess,
 			float reflectionCoeff,
 			float refractionCoeff,
-			float refractiveIndex) :
+			float A,
+			float B) :
 			color(color),
 			specularCoeff(specularCoeff),
 			diffuseCoeff(diffuseCoeff),
@@ -88,8 +160,9 @@ namespace Graphics
 			shininess(shininess),
 			reflectionCoeff(reflectionCoeff),
 			refractionCoeff(refractionCoeff),
-			refractiveIndex(refractiveIndex)
-
+			refractiveIndex(A),
+			cauchyCoeff_A(A),
+			cauchyCoeff_B(B)
 		{}
 
 		Material(vec3 color):
@@ -100,8 +173,17 @@ namespace Graphics
 			shininess(1),
 			reflectionCoeff(0.02f),
 			refractionCoeff(0.f),
-			refractiveIndex(2.417f) //Diamond
+			refractiveIndex(1.f),
+			cauchyCoeff_A(1.f),
+			cauchyCoeff_B(0.0f)//Glass
 		{}
+
+		// Return the refractive index according to Cauchy's formula
+		// wavelength is in nanometer
+		float cauchyRefractiveIndex(float wavelength)
+		{
+			return cauchyCoeff_A + cauchyCoeff_B / (wavelength * wavelength);
+		}
 		
 	};
 
@@ -137,10 +219,10 @@ namespace Graphics
 	{
 	public:
 		std::vector<Triangle> polygons;
-		LightPoint lightSource;
+		Light& lightSource;
 		glm_color_t ambiantLight;
 
-		Scene(LightPoint lightSource, glm::vec3 ambiantLight) :
+		Scene(Light& lightSource, const glm::vec3& ambiantLight) :
 			lightSource(lightSource), ambiantLight(ambiantLight)
 		{
 		}
@@ -177,82 +259,41 @@ namespace Graphics
 			const Ray* rayPtr;
 		};
 
-	}
 
-	namespace Dispersion
-	{
 
-		// Describes a color using a simplified wave model
-		class ColorWave
+		namespace Dispersion
 		{
-		public:
-			float wavelenght; //in nanometer
 
-			ColorWave(float wavelenght):
-				wavelenght{wavelenght}
-			{ }
-
-			// compute an approximation of the RGB color from the wavelength using
-			// the method from Mihai and Strajescu, FROM WAVELENGTH TO RGB FILTER, 2007
-			glm_color_t toRGBcolor()
+			class RayWave : public Ray
 			{
-				if (380 <= wavelenght && wavelenght < 410)
+			public:
+				bool isMonochromatic;
+				float wavelength;
+
+				RayWave(vec3 start, vec3 dir) :
+					Ray(start, dir)
 				{
-					float R = 0.6f - 0.41f * (410 - wavelenght) / 30;
-					float G = 0;
-					float B = 0.39f + 0.6f * (410 - wavelenght) / 30;
-					return glm_color_t(R, G, B);
+					wavelength = 0;
+					isMonochromatic = false;
 				}
-				else if (410 <= wavelenght && wavelenght < 440)
+
+				RayWave(const RayWave& upgradedRay) :
+					Ray(upgradedRay.start, upgradedRay.direction),
+					wavelength(0)
 				{
-					float R = 0;
-					float G = 1-(490-wavelenght) / 50;
-					float B = 1;
-					return glm_color_t(R, G, B);
+					isMonochromatic = false;
 				}
-				else if (490 <= wavelenght && wavelenght < 510)
+
+				RayWave(const RayWave& upgradedRay, float wavelength) :
+					Ray(upgradedRay.start, upgradedRay.direction),
+					wavelength(wavelength)
 				{
-					float R = 0;
-					float G = 1;
-					float B = (510-wavelenght)/20;
-					return glm_color_t(R, G, B);
+					isMonochromatic = true;
 				}
-				else if (510 <= wavelenght && wavelenght < 580)
-				{
-					float R = 1-(580-wavelenght)/70;
-					float G = 1;
-					float B = 0;
-					return glm_color_t(R, G, B);
-				}
-				else if (580 <= wavelenght && wavelenght < 640)
-				{
-					float R = 1;
-					float G = (640 - wavelenght)/60;
-					float B = 0;
-					return glm_color_t(R, G, B);
-				}
-				else if (640 <= wavelenght && wavelenght < 700)
-				{
-					float R = 1;
-					float G = 0;
-					float B = 0;
-					return glm_color_t(R, G, B);
-				}
-				else if (700 <= wavelenght && wavelenght < 780)
-				{
-					float R = 0.35f-0.65f*(780-wavelenght)/80;
-					float G = 0;
-					float B = 0;
-					return glm_color_t(R, G, B);
-				}
-				else
-				{
-					return COLOR_BLACK;
-				}
-			}
-		};
 
 
+			};
+		}
 	}
 
 }

@@ -31,23 +31,26 @@ void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManage
 int main(int argc, char* argv[])
 {
 	const Graphics::Screen SCREEN{
-	50 * 2 * 2, //width
-	50 * 2 * 2 // height
+	50 * 2 *2 *2, //width
+	50 * 2 *2 *2// height
 	};
 
 	//camera 
 	const float FOCAL{ static_cast<float>(SCREEN.height)};
 	Graphics::Camera camera(
-		vec3(0, 0, (-2 * FOCAL / SCREEN.height) - 0.9f),
+		vec3(1.f, 0.5f, -0.5f), //position
 		FOCAL,
 		SCREEN);
+	camera.rotationMatrix = Graphics::rotationYMatrix(45) * camera.rotationMatrix;
 
 	//lighting
-	constexpr vec3 INDIRECT_LIGHT = 0.5f * vec3(1, 1, 1);
-	Graphics::LightPoint light{
-		glm::vec3(-1.f, 0.8f, 0.5f),
-		20.f * glm::vec3(1.0f, 1.0f, 1.0f)
-	};
+	constexpr vec3 INDIRECT_LIGHT = 0.5f * Graphics::COLOR_WHITE;
+
+	Graphics::LightDirectional light(
+		glm::vec3(0.6f, 0, 0), //position
+		Graphics::COLOR_WHITE, //color
+		glm::vec3(1, 1, 0) //direction
+	);
 
 	//3D models
 	Graphics::Scene scene(light, INDIRECT_LIGHT);
@@ -97,7 +100,7 @@ void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawing
 	{
 		for (int x = 0; x < camera.screen.width; ++x)
 		{
-			auto color = Graphics::Raytracing::raytraceRecursive(camera, scene, x, y, 5);
+			auto color = Graphics::Raytracing::Dispersion::raytraceRecursiveWithDispersion(camera, scene, x, y, 5);
 			drawingManager.drawPixel(x, y, color);
 		}
 	}
@@ -106,7 +109,6 @@ void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawing
 
 void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager)
 {
-
 	//step for translations
 	float step{ 0.1f };
 
@@ -144,6 +146,14 @@ void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManag
 	if (manager.isKeyPressed(IInputManager::Key::Y))
 	{
 		camera.rotationMatrix = Graphics::rotationYMatrix(-yaw) * camera.rotationMatrix;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::G))
+	{
+		camera.rotationMatrix = Graphics::rotationXMatrix(yaw) * camera.rotationMatrix;
+	}
+	if (manager.isKeyPressed(IInputManager::Key::H))
+	{
+		camera.rotationMatrix = Graphics::rotationXMatrix(-yaw) * camera.rotationMatrix;
 	}
 }
 

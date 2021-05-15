@@ -6,13 +6,15 @@ using std::vector;
 
 namespace Graphics
 {
-	const float PI{ static_cast<float>(atan(1) * 4) };
 
 	// Convert degrees to radians
 	float degreeToRad(float degree);
 
 	// Return the rotation matrix around the Y-axis of a yaw Yaw
 	glm::mat3 rotationYMatrix(float yaw);
+
+	// Return the rotation matrix around the X-axis of a yaw Yaw
+	glm::mat3 rotationXMatrix(float yaw);
 
 	namespace Raytracing
 	{
@@ -43,7 +45,7 @@ namespace Graphics
 		bool TryIntersection(const Ray& ray, const Triangle& triangle, float& lambdaOut, glm::vec3& pointOut);
 
 		// Compute the color of a point directly illuminated by a light source Light
-		glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const LightPoint& light);
+		glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const Light& light);
 
 		// Return the color of the pixel according to raytracing
 		glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y);
@@ -52,5 +54,28 @@ namespace Graphics
 		glm_color_t raytraceRecursive(const Camera& camera, const Scene& scene, int x, int y, const int depthMax);
 
 		glm_color_t raytrace_recursive_call(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth);
+
+		namespace Dispersion
+		{
+			constexpr float VISIBLE_SPECTRUM_START = 380; //nanometers
+			constexpr float VISIBLE_SPECTRUM_END = 780;
+
+			// Return the color of the pixel according to recursive raytracing
+			// Use a dispersive model
+			glm_color_t raytraceRecursiveWithDispersion(const Camera& camera, const Scene& scene, int x, int y, const int depthMax);
+
+			// Return the color of refracted light
+			// Dispersion aware version
+			glm_color_t refractedLightWithDispersion(const Scene& scene, const Intersection& intersection, const RayWave& incidentRayWave, const int depthMax, const int depth);
+
+			// Recursive call for raytracing
+			// Dispersion aware version
+			glm_color_t recursive_raytracing_with_dispersion_call(const Scene& scene, const RayWave& incidentRayWave, const int depthMax, const int depth);
+
+			// compute an approximation of the RGB color from the wavelength using
+			// the method from Mihai and Strajescu, FROM WAVELENGTH TO RGB FILTER, 2007
+			glm_color_t WavelengthRGBFilter(float wavelength);
+
+		}
 	}
 }

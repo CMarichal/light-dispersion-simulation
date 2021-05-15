@@ -22,9 +22,31 @@ namespace Graphics
             vec3(-sin(degreeToRad(yaw)), 0, cos(degreeToRad(yaw))));
     }
 
+    glm::mat3 rotationXMatrix(float yaw)
+    {
+        return glm::mat3(
+            vec3(1, 0, 0),
+            vec3(0, cos(degreeToRad(yaw)), -sin(degreeToRad(yaw))),
+            vec3(0, sin(degreeToRad(yaw)), cos(degreeToRad(yaw))));
+    }
+
     inline float positiveCos(const vec3& v1, const vec3& v2)
     {
         return std::max(glm::dot(v1, v2), 0.0f);
+    }
+
+    void Interpolate(const float a, const float b, vector<float>& result)
+    {
+        int N = result.size();
+        float step = float(b - a) / float(std::max(N - 1, 1));
+
+        float current = a;
+        for (float& pixelResult : result)
+        {
+            pixelResult = current;
+            current += step;
+        }
+        return;
     }
 
     namespace Raytracing
@@ -65,13 +87,6 @@ namespace Graphics
             const glm_color_t specularPart = materialPtr->color * materialPtr->specularCoeff * pow(positiveCos(halwayDirection, n), materialPtr->shininess) * directLight;
 
             return lambertianPart + specularPart;
-        }
-
-
-        float quadraticFalloff(const Intersection& i, const LightPoint& light)
-        {
-            const glm::vec3 l = light.pos - i.position;
-            return 1 / (4 * PI * glm::dot(l, l));
         }
 
         glm_color_t refractedLight(const Scene& scene, const Intersection& intersection, const Ray& incidentRay, const int depthMax, const int depth)
@@ -168,12 +183,12 @@ namespace Graphics
         }
 
 
-        glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const LightPoint& light) 
+        glm_color_t DirectLight(const Intersection& i, const vector<Triangle>& triangles, const Light& light) 
         {
-            Ray ray(light.pos, normalize(i.position - light.pos));
-
-            const glm::vec3 l{ light.pos - i.position };
-            float lightToPointDistance{ glm::length(l) };
+            const glm::vec3 l = light.getIncidentRayDirection(i.position);
+            Ray ray(light.pos, l);
+            
+            float lightToPointDistance = light.getDistance(i.position);
 
             auto intersectionList = FindIntersections(ray, triangles);
             if (intersectionList.size() > 0)
@@ -181,7 +196,7 @@ namespace Graphics
                 //equation for illumination
                 auto closestIntersec = ClosestIntersection(intersectionList);
                 // Check if the intersection point is the closest one to the light along the ray
-                // Otherwise, cast no light
+                // Otherwise, cast no light : Direct shadows
                 if (fabs(closestIntersec.distance - lightToPointDistance) > EPSILON)
                 {
                     return COLOR_BLACK;
@@ -191,14 +206,7 @@ namespace Graphics
             const glm::vec3 n{ i.trianglePtr->normal };
             const float cosAngle{ std::max(glm::dot(glm::normalize(l), n), 0.0f) };
 
-            return light.color * quadraticFalloff(i, light);
-        }
-
-        glm_color_t computeColorLight(const Intersection& intersection, const Scene& scene, const LightPoint& lightSource)
-        {
-            auto directLightColor = DirectLight(intersection, scene.polygons, lightSource);
-            auto lightDirection = glm::normalize(lightSource.pos - intersection.position);
-            return lambertianIllumination(intersection, scene.ambiantLight, directLightColor, lightDirection);
+            return light.color * light.falloff(i.position);
         }
 
         glm_color_t raytrace(const Camera& camera, const Scene& scene, int x, int y)
@@ -215,7 +223,8 @@ namespace Graphics
             {
                 auto closestIntersection = ClosestIntersection(intersectionList);
                 //equation for illumination
-                color = computeColorLight(closestIntersection, scene, scene.lightSource);
+                vec3 incidentRayDir = scene.lightSource.getIncidentRayDirection(closestIntersection.position);
+                color = lambertianIllumination(closestIntersection, scene.ambiantLight, scene.lightSource.color, incidentRayDir);
             }
             return color;
         }
@@ -266,7 +275,7 @@ namespace Graphics
 
                 // DIRECT ILLUMINATION
                 auto originLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
-                vec3 lightDir = glm::normalize(scene.lightSource.pos - closestIntersection.position);
+                vec3 lightDir = -scene.lightSource.getIncidentRayDirection(closestIntersection.position);
                 auto illuminationColor = phongIllumination(closestIntersection, scene.ambiantLight, originLightColor, lightDir);
 
                 // ADDING TOGETHER
@@ -278,6 +287,183 @@ namespace Graphics
             // no object found
             return Graphics::COLOR_BLACK;
         }
- 
+
+
+        namespace Dispersion
+        {
+            glm_color_t raytraceRecursiveWithDispersion(const Camera& camera, const Scene& scene, int x, int y, const int depthMax)
+            {
+                int depth = 0;
+                glm_color_t color = Graphics::COLOR_BLACK;
+
+                vec3 dirRayFromPixel(x - camera.screen.width / 2, y - camera.screen.height / 2, camera.focal);
+                RayWave rayFromPixel(camera.position, camera.rotationMatrix * dirRayFromPixel);
+                rayFromPixel.isMonochromatic = false;
+                return recursive_raytracing_with_dispersion_call(scene, rayFromPixel, depthMax, depth);
+            }
+
+            glm_color_t refractedLightWithDispersion(const Scene& scene, const Intersection& intersection, const RayWave& incidentRayWave, const int depthMax, const int depth)
+            {
+                auto normal = intersection.trianglePtr->normal;
+
+                float refractiveRatio{};
+                //exterior normals assumption
+                if (glm::dot(incidentRayWave.direction, normal) <= 0)
+                {
+                    refractiveRatio = 1 / intersection.trianglePtr->material->cauchyRefractiveIndex(incidentRayWave.wavelength);
+                }
+                else
+                {
+                    refractiveRatio = intersection.trianglePtr->material->cauchyRefractiveIndex(incidentRayWave.wavelength);
+                }
+                RayWave refractedRay(intersection.position, glm::refract(incidentRayWave.direction, normal, refractiveRatio));
+                refractedRay.isMonochromatic = true;
+                refractedRay.wavelength = incidentRayWave.wavelength;
+                auto refractedLightColor = recursive_raytracing_with_dispersion_call(scene, refractedRay, depthMax, depth + 1);
+
+                return refractedLightColor;
+            }
+
+            glm_color_t recursive_raytracing_with_dispersion_call(const Scene& scene, const RayWave& incidentRayWave, const int depthMax, const int depth)
+            {
+                // compute the direct light color at the end
+                if (depth >= depthMax)
+                {
+                    return Graphics::COLOR_BLACK;
+                }
+
+                //looking for intersection
+                auto intersectionList = FindIntersections(incidentRayWave, scene.polygons);
+                if (intersectionList.size() > 0)
+                {
+                    auto closestIntersection = ClosestIntersection(intersectionList);
+                    auto normal = closestIntersection.trianglePtr->normal;
+
+
+                    // REFLECTION
+                    glm_color_t reflectedLightColor = Graphics::COLOR_BLACK;
+                    if (closestIntersection.trianglePtr->material->reflectionCoeff > 0)
+                    {
+                        RayWave reflectedRay(closestIntersection.position, glm::reflect(incidentRayWave.direction, normal));
+                        if (incidentRayWave.isMonochromatic)
+                        {
+                            reflectedRay.isMonochromatic = true;
+                            reflectedRay.wavelength = incidentRayWave.wavelength;
+                        }
+                        auto reflectedLightColor = recursive_raytracing_with_dispersion_call(scene, reflectedRay, depthMax, depth + 1);
+                    }
+
+                    // REFRACTION
+                    glm_color_t refractedLightColor = Graphics::COLOR_BLACK;
+                    if (closestIntersection.trianglePtr->material->refractionCoeff > 0)
+                    {
+                        // check out if the ray is already monochromatic or if the material is non-dispersive
+                        if (incidentRayWave.isMonochromatic || (closestIntersection.trianglePtr->material->refractiveIndex == 1))
+                        {
+                            refractedLightColor = refractedLight(scene, closestIntersection, incidentRayWave, depthMax, depth);
+                        }
+                        else
+                        {
+                            // Interpolation of wavelengths
+                            const int nbInterpolation = 10;
+                            vector<float> wavelengths{};
+                            wavelengths.resize(nbInterpolation);
+                            Interpolate(VISIBLE_SPECTRUM_START, VISIBLE_SPECTRUM_END, wavelengths);
+
+                            for (float wavelength : wavelengths)
+                            {
+                                //additive color mixing
+                                auto monochromaticIncidentRay = RayWave(incidentRayWave, wavelength);
+                                refractedLightColor += refractedLightWithDispersion(scene, closestIntersection, monochromaticIncidentRay, depthMax, depth);
+                            }
+                            refractedLightColor /= nbInterpolation; //energy preservation
+                        }
+                    }
+
+                    // DIRECT ILLUMINATION
+                    auto originLightColor = DirectLight(closestIntersection, scene.polygons, scene.lightSource);
+                    vec3 lightDir = -scene.lightSource.getIncidentRayDirection(closestIntersection.position);
+                    auto illuminationColor = phongIllumination(closestIntersection, scene.ambiantLight, originLightColor, lightDir);
+
+                    // ADDING TOGETHER
+                    auto color = illuminationColor
+                        + closestIntersection.trianglePtr->material->reflectionCoeff * reflectedLightColor
+                        + closestIntersection.trianglePtr->material->refractionCoeff * refractedLightColor;
+                    if (incidentRayWave.isMonochromatic)
+                    {
+                        auto wavelengthColor = WavelengthRGBFilter(incidentRayWave.wavelength);
+                        color *= wavelengthColor;
+                    }
+                    return color;
+                }
+                // no object found
+                return Graphics::COLOR_BLACK;
+            }
+
+            glm_color_t WavelengthRGBFilter(float wavelength)
+            {
+                if (380 <= wavelength && wavelength < 410)
+                {
+                    float R = 0.6f - 0.41f * (410 - wavelength) / 30;
+                    float G = 0;
+                    float B = 0.39f + 0.6f * (410 - wavelength) / 30;
+                    return glm_color_t(R, G, B);
+                }
+                else if (410 <= wavelength && wavelength < 440)
+                {
+                    float R = 0.19f - 0.19f * (440-wavelength) / 30;
+                    float G = 0;
+                    float B = 1;
+                    return glm_color_t(R, G, B);
+                }
+                else if (440 <= wavelength && wavelength < 490)
+                {
+                    float R = 0;
+                    float G = 1 - (490 - wavelength) / 50;
+                    float B = 1;
+                    return glm_color_t(R, G, B);
+                }
+                else if (490 <= wavelength && wavelength < 510)
+                {
+                    float R = 0;
+                    float G = 1;
+                    float B = (510 - wavelength) / 20;
+                    return glm_color_t(R, G, B);
+                }
+                else if (510 <= wavelength && wavelength < 580)
+                {
+                    float R = 1 - (580 - wavelength) / 70;
+                    float G = 1;
+                    float B = 0;
+                    return glm_color_t(R, G, B);
+                }
+                else if (580 <= wavelength && wavelength < 640)
+                {
+                    float R = 1;
+                    float G = (640 - wavelength) / 60;
+                    float B = 0;
+                    return glm_color_t(R, G, B);
+                }
+                else if (640 <= wavelength && wavelength < 700)
+                {
+                    float R = 1;
+                    float G = 0;
+                    float B = 0;
+                    return glm_color_t(R, G, B);
+                }
+                else if (700 <= wavelength && wavelength < 780)
+                {
+                    float R = 0.35f - 0.65f * (780 - wavelength) / 80;
+                    float G = 0;
+                    float B = 0;
+                    return glm_color_t(R, G, B);
+                }
+                else
+                {
+                    return COLOR_BLACK;
+                }
+            }
+
+        }
     }
 }

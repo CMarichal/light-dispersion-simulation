@@ -20,11 +20,16 @@ namespace TestModel
 		grey, 
 		1, //specular
 		0, //diffuse
-		0, //ambiant
+		0.1, //ambiant
 		2, //shininess
-		0.5, //reflection
+		0.f, //reflection
 		1, //refraction
-		1);
+		1.5046f,
+		420'000.f);
+	//BK7 borosilicate glass
+	// A =1.5046
+	// B =420 000nm²
+
 
 	void LoadTestModelCornellBox(std::vector<Triangle>& triangles)
 	{
@@ -182,10 +187,11 @@ namespace TestModel
 		// Prism
 
 		float half_L = L/2;
+		float sizePrism = 6;
 		//prism base
-		vec3 E(half_L - 2, 0, half_L + 2);
-		vec3 F(half_L + 2, 0, half_L + 2);
-		vec3 G(half_L, 0, half_L - 2);
+		vec3 E(half_L - sizePrism, 0, half_L + sizePrism);
+		vec3 F(half_L + sizePrism, 0, half_L + sizePrism);
+		vec3 G(half_L, 0, half_L - sizePrism);
 
 		float height = 8;
 		//prism top
