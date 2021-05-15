@@ -30,12 +30,16 @@ void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& man
 void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
 // Handle the camera displacements
 void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+// Welcome the user and provides commands
+void printWelcomeMessage();
 
 // ----------------------------------------------------------------------------
 // MAIN PROGRAMM
 
 int main(int argc, char* argv[])
 {
+	printWelcomeMessage();
+
 	// Screen where rays are projected to pixels
 	const Graphics::Screen SCREEN{
 	50 * 2 *2 *2, //width
@@ -198,4 +202,35 @@ void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManage
 	{
 		scene.lightSource.pos += step * camera.down();
 	}
+}
+
+
+void printWelcomeMessage()
+{
+	std::cout << "Welcome to Prisms with SMFL" << std::endl;
+	std::cout << "This build displays light dispersion on a prism using the SFML display library" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Camera commands:" << std::endl;
+	std::cout << "- Up-down arrows: to move along the Z-axis" << std::endl;
+	std::cout << "- Left-right arrows: to move along the X-axis" << std::endl;
+	std::cout << "- R, F: to move along the Y-axis" << std::endl;
+	std::cout << "- T, Y: to turn around the Y-axis" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Light commands:" << std::endl;
+	std::cout << "- W, S: to move along the Z-axis" << std::endl;
+	std::cout << "- A, D: to move along the X-axis" << std::endl;
+	std::cout << "- Q, E: to move along the Y-axis" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Please be sure to hold the button down during the rendering process" << std::endl;
+	std::cout << "It usually takes a few seconds to display a 500x500 window" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "This project was a part of the DH2323-DGI21 Computer Graphics and Interaction course at KTH" << std::endl;
+	std::cout << "Developer : Charles-Eole Marichal - marichal@kth.se" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "----------------" << std::endl;
 }
