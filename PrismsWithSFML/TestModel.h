@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TEST_MODEL_H
+#define TEST_MODEL_H
+
 #include "stdafx.h"
 
 #include "GraphicsModel.h"
@@ -33,3 +35,4 @@ namespace TestModel
 	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles);
 }
 
+#endif

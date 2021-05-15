@@ -1,4 +1,6 @@
-#pragma once
+#ifndef UTILITIES_H
+#define UTILITIES_H
+
 #include "stdafx.h"
 
 #include <chrono>
@@ -41,4 +43,8 @@ namespace utilities
 	};
 }
 
+
+
+
+#endif // !UTILITIES_H
 

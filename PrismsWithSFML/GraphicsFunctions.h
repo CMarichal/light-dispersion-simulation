@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GRAPHICS_FUNCTIONS_H
+#define GRAPHICS_FUNCTIONS_H
+
 #include "stdafx.h"
 #include "GraphicsModel.h"
 
@@ -79,3 +81,4 @@ namespace Graphics
 		}
 	}
 }
+#endif

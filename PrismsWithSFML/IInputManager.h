@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IINPUT_MANAGER_H
+#define IINPUT_MANAGER_H
 
 // Interface for input managers
 class IInputManager
@@ -27,3 +28,4 @@ public:
 	virtual bool isKeyPressed(Key key) = 0;
 	
 };
+#endif

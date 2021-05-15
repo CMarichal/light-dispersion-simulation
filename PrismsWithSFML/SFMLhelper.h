@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SFML_HELPER_H
+#define SFML_HELPER_H
+
 #include "stdafx.h"
 #include <SFML/Graphics.hpp>
 #include "IDrawingManager.h"
@@ -122,3 +124,4 @@ private:
 	}
 
 };
+#endif

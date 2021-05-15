@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GRAPHICS_MODEL_H
+#define GRAPHICS_MODEL_H
+
 #include "stdafx.h"
 
 using glm::vec3;
@@ -297,6 +299,8 @@ namespace Graphics
 	}
 
 }
+
+#endif
 
 
 

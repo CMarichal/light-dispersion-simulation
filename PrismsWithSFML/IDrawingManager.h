@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IDRAWING_MANAGER_H
+#define IDRAWING_MANAGER_H
 #include "stdafx.h"
 
 // Interface for drawing managers
@@ -22,3 +23,4 @@ public:
 	virtual void saveToFile(std::string filename) = 0;
 };
 
+#endif
