@@ -1,8 +1,9 @@
 #ifndef IDRAWING_MANAGER_H
 #define IDRAWING_MANAGER_H
+
 #include "stdafx.h"
 
-// Interface for drawing managers
+// Interface for managers that draw the rendered scene on a support
 class IDrawingManager
 {
 public:

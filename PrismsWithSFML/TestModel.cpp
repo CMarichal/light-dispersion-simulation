@@ -163,7 +163,7 @@ namespace TestModel
 		}
 	}
 
-	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles)
+	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles, float prismSize)
 	{
 		triangles.clear();
 		triangles.reserve(2 + 2 + 3 * 2);
@@ -187,11 +187,10 @@ namespace TestModel
 		// Prism
 
 		float half_L = L/2;
-		float sizePrism = 6;
 		//prism base
-		vec3 E(half_L - sizePrism, 0, half_L + sizePrism);
-		vec3 F(half_L + sizePrism, 0, half_L + sizePrism);
-		vec3 G(half_L, 0, half_L - sizePrism);
+		vec3 E(half_L - prismSize, 0, half_L + prismSize);
+		vec3 F(half_L + prismSize, 0, half_L + prismSize);
+		vec3 G(half_L, 0, half_L - prismSize);
 
 		float height = 8;
 		//prism top

@@ -1,14 +1,16 @@
 #ifndef GRAPHICS_FUNCTIONS_H
 #define GRAPHICS_FUNCTIONS_H
 
+// This files contains useful graphics functions
+
 #include "stdafx.h"
 #include "GraphicsModel.h"
 
 using std::vector;
 
+// Namespace for graphics objects and methods
 namespace Graphics
 {
-
 	// Convert degrees to radians
 	float degreeToRad(float degree);
 
@@ -18,10 +20,12 @@ namespace Graphics
 	// Return the rotation matrix around the X-axis of a yaw Yaw
 	glm::mat3 rotationXMatrix(float yaw);
 
+	//Namespace for objects associated with raytracing
 	namespace Raytracing
 	{
-
+		// Maximum distance that is used in looking for intersections
 		const float MAX_DISTANCE{ std::numeric_limits<float>::max() };
+		// Numbers below espilon are considered as zero
 		constexpr double EPSILON{ 0.0001 };
 
 		// compute a color according to Lambertian Illumination Model
@@ -54,9 +58,9 @@ namespace Graphics
 
 		// Return the color of the pixel according to recursive raytracing
 		glm_color_t raytraceRecursive(const Camera& camera, const Scene& scene, int x, int y, const int depthMax);
-
 		glm_color_t raytrace_recursive_call(const Scene& scene, const Ray& incomingRay, const int depthMax, const int depth);
 
+		//Namespace for objects associated with dispersive raytracing
 		namespace Dispersion
 		{
 			constexpr float VISIBLE_SPECTRUM_START = 380; //nanometers
@@ -69,15 +73,11 @@ namespace Graphics
 			// Return the color of refracted light
 			// Dispersion aware version
 			glm_color_t refractedLightWithDispersion(const Scene& scene, const Intersection& intersection, const RayWave& incidentRayWave, const int depthMax, const int depth);
-
-			// Recursive call for raytracing
-			// Dispersion aware version
 			glm_color_t recursive_raytracing_with_dispersion_call(const Scene& scene, const RayWave& incidentRayWave, const int depthMax, const int depth);
 
 			// compute an approximation of the RGB color from the wavelength using
 			// the method from Mihai and Strajescu, FROM WAVELENGTH TO RGB FILTER, 2007
 			glm_color_t WavelengthRGBFilter(float wavelength);
-
 		}
 	}
 }

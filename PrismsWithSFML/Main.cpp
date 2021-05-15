@@ -13,7 +13,6 @@
 #include "SFMLhelper.h"
 #include "Utilities.h"
 
-
 // ----------------------------------------------------------------------------
 // USING STATEMENTS
 
@@ -21,18 +20,26 @@ using glm::vec3;
 using glm::mat3;
 
 // ----------------------------------------------------------------------------
-// FUNCTIONS
+// FUNCTIONS DECLARATIONS
 
+// Draw the scene at a current instant
 void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawingManager& manager);
+// Update objects positions according to inputs
 void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+// Handle the camera movements
 void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+// Handle the camera displacements
 void ControlLight(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager);
+
+// ----------------------------------------------------------------------------
+// MAIN PROGRAMM
 
 int main(int argc, char* argv[])
 {
+	// Screen where rays are projected to pixels
 	const Graphics::Screen SCREEN{
 	50 * 2 *2 *2, //width
-	50 * 2 *2 *2// height
+	50 * 2 *2 *2  //height
 	};
 
 	//camera 
@@ -55,10 +62,12 @@ int main(int argc, char* argv[])
 	//3D models
 	Graphics::Scene scene(light, INDIRECT_LIGHT);
 
-	//SFML SCREEN
+	//SFML SCREEN - change those two lines to change of display and input handling libraries
 	auto drawingManager = SFML_Manager(camera.screen.width, camera.screen.height);
+	auto inputManager = drawingManager;
 
-	TestModel::LoadTestModelTriangularPrism(scene.polygons);
+	//Load a test model
+	TestModel::LoadTestModelTriangularPrism(scene.polygons, 6.0f);
 
 	auto chrono = utilities::Chrono();
 	chrono.startChrono();
@@ -66,7 +75,7 @@ int main(int argc, char* argv[])
 	{
 		drawingManager.cleanWindow();
 
-		Update(scene, camera, drawingManager);
+		Update(scene, camera, inputManager);
 		Draw(scene, camera, drawingManager);
 
 		drawingManager.display();
@@ -76,6 +85,9 @@ int main(int argc, char* argv[])
 	drawingManager.saveToFile("Screenshot.png");
 	return EXIT_SUCCESS;
 }
+
+// ----------------------------------------------------------------------------
+// MAIN FUNCTIONS DEFINITIONS
 
 void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager)
 {
@@ -92,8 +104,6 @@ void Update(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& man
 	ControlLight(scene, camera, manager);
 }
 
-
-
 void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawingManager& drawingManager)
 {
 	for (int y = 0; y < camera.screen.height; ++y)
@@ -105,7 +115,6 @@ void Draw(const Graphics::Scene& scene, const Graphics::Camera& camera, IDrawing
 		}
 	}
 }
-
 
 void ControlCamera(Graphics::Scene& scene, Graphics::Camera& camera, IInputManager& manager)
 {

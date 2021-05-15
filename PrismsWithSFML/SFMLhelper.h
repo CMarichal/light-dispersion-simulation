@@ -5,8 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include "IDrawingManager.h"
 #include "IInputManager.h"
-#include <memory>
 
+// Class that makes it possible to use SFML by implementing the provided interfaces
 class SFML_Manager : public IDrawingManager, public IInputManager
 {
 private:

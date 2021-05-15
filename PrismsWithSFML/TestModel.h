@@ -1,10 +1,10 @@
 #ifndef TEST_MODEL_H
 #define TEST_MODEL_H
 
-#include "stdafx.h"
+// Defines the test models
 
+#include "stdafx.h"
 #include "GraphicsModel.h"
-// Defines a simple test model: The Cornell Box
 
 namespace TestModel
 {
@@ -32,7 +32,8 @@ namespace TestModel
 	// -1 <= x <= +1
 	// -1 <= y <= +1
 	// -1 <= z <= +1
-	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles);
+	// Changing the prism size will make it wider
+	void LoadTestModelTriangularPrism(std::vector<Graphics::Triangle>& triangles, float prismSize = 2);
 }
 
 #endif

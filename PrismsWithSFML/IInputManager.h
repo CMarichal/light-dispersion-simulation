@@ -1,10 +1,11 @@
 #ifndef IINPUT_MANAGER_H
 #define IINPUT_MANAGER_H
 
-// Interface for input managers
+// Interface for managers that handles user's inputs
 class IInputManager
 {
 public:
+	// Keys handled by the manager
 	enum class Key
 	{
 		LEFT_ARROW,

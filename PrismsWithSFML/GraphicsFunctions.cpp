@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "GraphicsFunctions.h"
 
+// Defines the functions declared in its GraphicsFunctions.h
+// All the functions descriptions could be found there
+
 #include <cmath>
 
 using glm::dot;
@@ -89,6 +92,7 @@ namespace Graphics
             return lambertianPart + specularPart;
         }
 
+
         glm_color_t refractedLight(const Scene& scene, const Intersection& intersection, const Ray& incidentRay, const int depthMax, const int depth)
         {
             auto normal = intersection.trianglePtr->normal;
@@ -108,7 +112,7 @@ namespace Graphics
             return refractedLightColor;
         }
 
-        
+
         vector<Intersection> FindIntersections(const Ray& ray, const vector<Triangle>& triangles)
         {
             vector<Intersection> intersectionsList{};
@@ -298,6 +302,8 @@ namespace Graphics
 
                 vec3 dirRayFromPixel(x - camera.screen.width / 2, y - camera.screen.height / 2, camera.focal);
                 RayWave rayFromPixel(camera.position, camera.rotationMatrix * dirRayFromPixel);
+
+                //The first normal ray is assumed to be polychromatic
                 rayFromPixel.isMonochromatic = false;
                 return recursive_raytracing_with_dispersion_call(scene, rayFromPixel, depthMax, depth);
             }

@@ -1,14 +1,17 @@
 #ifndef GRAPHICS_MODEL_H
 #define GRAPHICS_MODEL_H
 
-#include "stdafx.h"
+// This file defines all the useful objects and constants used to model the graphics components
 
-using glm::vec3;
+#include "stdafx.h"
 
 namespace Graphics
 {
+	using glm::vec3;
 
-	typedef glm::vec3 glm_color_t;
+	// RGB colors using glm vec3
+	typedef vec3 glm_color_t;
+
 	constexpr glm_color_t COLOR_BLACK(0, 0, 0);
 	constexpr glm_color_t COLOR_WHITE(1, 1, 1);
 	
@@ -89,6 +92,7 @@ namespace Graphics
 			return glm::normalize(hitPoint - pos);
 		}
 
+		// Distance between the light source and the hit point
 		float getDistance(vec3 hitPoint) const override
 		{
 			return glm::length(hitPoint - pos);
@@ -119,6 +123,7 @@ namespace Graphics
 			return direction;
 		}
 
+		// Distance between the plane defined by the light direction and its source, and the hit point
 		float getDistance(vec3 hitPoint) const override
 		{
 			auto hypothenus = hitPoint - pos;
@@ -262,10 +267,10 @@ namespace Graphics
 		};
 
 
-
+		// Namespace containing dispersive raytracing models and functions extensions
 		namespace Dispersion
 		{
-
+			// Extension of a ray that can be monochromatic
 			class RayWave : public Ray
 			{
 			public:
@@ -292,7 +297,6 @@ namespace Graphics
 				{
 					isMonochromatic = true;
 				}
-
 
 			};
 		}

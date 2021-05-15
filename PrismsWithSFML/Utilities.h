@@ -1,8 +1,9 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include "stdafx.h"
+// Useful objects used in main to handle other things than graphics
 
+#include "stdafx.h"
 #include <chrono>
 
 namespace utilities
@@ -42,9 +43,6 @@ namespace utilities
 		}
 	};
 }
-
-
-
 
 #endif // !UTILITIES_H
 
